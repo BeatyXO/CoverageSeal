@@ -1,14 +1,22 @@
-# Verification checklist (pending)
+# Verification checklist
 
-- [ ] Repo pushed with immutable fixtures; 40-char fixture commit pinned in manifest/demo
-- [ ] Dependency / compile / lint issues fixed against **stable** GenVM
-- [ ] Unit tests and full Direct Mode suite passing with authentic logs
-- [ ] Independent validator execution tested, including forged-leader attempts
-- [ ] URL prefix/private-address/redirect and mutable web-source attacks tested
-- [ ] Stable StudioNet chain ID 61999 verified before each real transaction
-- [ ] CoverageSeal deployed, full/partial/missing/conflict cases finalized
-- [ ] CoverageGate deployed and correct/wrong pin and replay calls verified
-- [ ] Addresses and transactions recorded in DEPLOYMENT.md and proof JSON
-- [ ] Final preflight, tracked-file audit and clean GitHub `main`
+## Verified locally
 
-These boxes represent **uncompleted checks** in the starter package.
+- [x] Python 3.12 compileall over contracts, scripts and tests
+- [x] `python scripts/preflight.py`
+- [x] `pytest tests/unit -q`: 4 passed
+- [x] `pytest tests/direct -q`: 19 passed, including validator re-fetch/quote-grounding and disagreement cases
+- [x] `genvm-lint lint` passes for both contracts
+- [x] CLI network info reports `studionet`, chain ID 61999 and `https://studio.genlayer.com/api`
+- [x] Fixture Keccak-256 values calculated from local fixture bytes
+
+## Still required
+
+- [ ] `genvm-lint check` semantic validation against pinned SDK (blocked locally by Windows access denied reading the cached SDK)
+- [ ] Push fixture commit, obtain its actual SHA, pin manifest/demo URLs and verify reachable remote bytes
+- [ ] Deploy CoverageSeal and CoverageGate on stable StudioNet and capture finalized transaction evidence
+- [ ] Prove successful and rejected consumer actions on chain, including replay rejection
+- [ ] Record a real negative package lifecycle and publish `proof/verified-studionet.json`
+- [ ] Run final preflight, inspect remote tree and push the pinned final commit to GitHub
+
+No chain deployment or live transaction proof is claimed in this repository state.

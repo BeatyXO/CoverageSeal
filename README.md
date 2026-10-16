@@ -36,9 +36,11 @@ python scripts/fixture_digests.py
 - Each required requirement must be `COVERED`, no contradictions anywhere, and no unresolved assessments before finalization.
 - A single `FULL` is enough for `REQUIRE_FULL`; a `COMBINE_PARTIAL` threshold counts distinct content-digest artifacts after pair conflicts are resolved. Optional missing requirement does not block completion, but an optional contradiction does.
 
-## Audit boundary and status
+## Verification status
 
-This ZIP is a **substantially implemented handoff**, not a claimed StudioNet deployment. Portable checks can run without SDK; Direct Mode and live integration must be executed by the next agent in an environment with GenVM SDK/dependencies and valid chain access. Unverified runtime compatibility and validator disagreement are open review gates, not waived.
+Local verification completed: Python 3.12 compileall, structural preflight, 4 portable unit tests and 19 Direct Mode tests pass. Direct Mode uses the contract's pinned `py-genlayer` hash from the GenVM v0.3.0-rc7 bundle; validator tests explicitly rerun the independent fetch/classifier and reject a forged quote and a semantic disagreement. `genvm-lint lint` passes for both contracts. `genvm-lint check` semantic validation could not load its cached SDK due to Windows access denied, so that validation is still outstanding.
+
+The CLI reports stable `studionet`, chain ID 61999 and RPC `https://studio.genlayer.com/api`. No StudioNet write transactions, finalized deployments or live gate executions have been produced, and the fixture URLs remain intentionally unpinned until the fixture commit is pushed. No live proof is claimed.
 
 See `SUBMISSION.md`, `DEPLOYMENT.md`, `docs/ARCHITECTURE.md`, `docs/INVARIANTS.md`, `docs/THREAT_MODEL.md`, `docs/REVIEWER_DEMO.md`, and `proof/VERIFICATION_CHECKLIST.md`.
 
