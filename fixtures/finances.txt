@@ -1,3 +1,3 @@
-Atlas Labs accounting disclosure (fictional reviewer fixture).
-The company reported financial history for 2024 and 2025.
-Revenue for 2024 was 120 units; revenue for 2025 was 160 units.
+Atlas Labs annual report (fictional reviewer fixture).
+Shareholders are Ada (60 percent) and Bob (40 percent); no other shareholders are listed.
+Revenue was 120 units in 2024 and 160 units in 2025.
