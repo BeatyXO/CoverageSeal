@@ -19,7 +19,7 @@ def main():
     data['fixture_commit'] = sha
     url = f'https://raw.githubusercontent.com/BeatyXO/CoverageSeal/{sha}/fixtures/'
     data['source_prefix'] = url
-    for filename in ['ownership.txt', 'finances.txt', 'incidents_clear.txt', 'incidents_conflicting.txt']:
+    for filename in ['ownership.txt', 'finances.txt', 'ownership_only.txt', 'incidents_clear.txt', 'incidents_conflicting.txt']:
         contents = (ROOT / 'fixtures' / filename).read_bytes()
         h = keccak.new(digest_bits=256)
         h.update(contents)
