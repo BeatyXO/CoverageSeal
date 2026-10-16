@@ -1,0 +1,2 @@
+Atlas Labs second incident disclosure (fictional reviewer fixture).
+A production security incident occurred on March 14, 2025, affecting user authentication.

@@ -1,0 +1,2 @@
+Atlas Labs incident disclosure (fictional reviewer fixture).
+No security incidents affected production systems during 2025.

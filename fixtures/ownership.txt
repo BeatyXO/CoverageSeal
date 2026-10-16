@@ -1,0 +1,3 @@
+Atlas Labs legal ownership register (fictional reviewer fixture).
+Atlas Labs is owned by Ada (60 percent) and Bob (40 percent).
+There are no additional shareholders in this fixture.
