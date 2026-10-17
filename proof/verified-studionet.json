@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "verified_at_utc": "2026-10-17T00:12:55Z",
+  "verified_at_utc": "2026-10-17T07:49:18Z",
   "repository": "https://github.com/BeatyXO/CoverageSeal",
   "fixture_commit": "1ddcce53a43099fa25ec651a1bc06646f4a4771d",
   "chain_id": 61999,
@@ -44,29 +44,96 @@
   "successful_lifecycle": {
     "schema_id": 1,
     "requirements": [
-      {"requirement_id": 1, "key": "OWNERS", "policy": "REQUIRE_FULL", "status": "COVERED", "status_code": 3, "full_edges": 2, "conflicts": 0, "unresolved": false},
-      {"requirement_id": 2, "key": "FINANCES", "policy": "REQUIRE_FULL", "status": "COVERED", "status_code": 3, "full_edges": 2, "conflicts": 0, "unresolved": false}
+      {
+        "requirement_id": 1,
+        "key": "OWNERS",
+        "policy": "REQUIRE_FULL",
+        "status": "COVERED",
+        "status_code": 3,
+        "full_edges": 2,
+        "conflicts": 0,
+        "unresolved": false
+      },
+      {
+        "requirement_id": 2,
+        "key": "FINANCES",
+        "policy": "REQUIRE_FULL",
+        "status": "COVERED",
+        "status_code": 3,
+        "full_edges": 2,
+        "conflicts": 0,
+        "unresolved": false
+      }
     ],
     "package_id": 1,
     "artifacts": [
-      {"artifact_id": 1, "name": "ownership.txt", "digest": "f0c8fb1af94ea7d73f1d8dd719e18b01b5734a40cfdcba54d65780b99860cf41"},
-      {"artifact_id": 2, "name": "finances.txt", "digest": "8a62a4141409f212da530f43fa00df69b59a45cae25c3150b57cc364f320e918"}
+      {
+        "artifact_id": 1,
+        "name": "ownership.txt",
+        "digest": "f0c8fb1af94ea7d73f1d8dd719e18b01b5734a40cfdcba54d65780b99860cf41"
+      },
+      {
+        "artifact_id": 2,
+        "name": "finances.txt",
+        "digest": "8a62a4141409f212da530f43fa00df69b59a45cae25c3150b57cc364f320e918"
+      }
     ],
     "schema_hash": "fd02d81e0d77de329d8dee8ba7d8520f03f0fe378e9ef3086a7e73c9ff07b180",
     "package_hash": "2bbe1b8a4bac34ae2a4975dcc0cb8d1d17d0103846ee54fb16de73e12993a04d",
     "snapshot_hash": "1de0db8d9289efb975ffca6e21f2e7cff2d7e49b347c17f947b122179f0eff7b",
-    "requirement_statuses": {"OWNERS": 3, "FINANCES": 3},
+    "requirement_statuses": {
+      "OWNERS": 3,
+      "FINANCES": 3
+    },
     "package_status": "COMPLETE",
     "package_status_code": 2,
     "edge_assessments": [
-      {"requirement_id": 1, "artifact_id": 1, "classification": "FULL", "code": 3, "transaction": "0xb4c7c40422ec7d9fcace4ed508a77f190eee03fee6b35646d634c2e91a42c233"},
-      {"requirement_id": 1, "artifact_id": 2, "classification": "FULL", "code": 3, "transaction": "0xbb015a13cd5e91bcd210ed8e45af58aff8295630e485a914e96be3bf08520087"},
-      {"requirement_id": 2, "artifact_id": 1, "classification": "FULL", "code": 3, "transaction": "0xa42add3b79c074ecb5a3d65a5ae1e9151b62c2c18b535d29875461107f3c7fc2"},
-      {"requirement_id": 2, "artifact_id": 2, "classification": "FULL", "code": 3, "transaction": "0x549a7bfba88bed9e04e1b53cbc518eba0c220375ccf1fe74e783935aea2e8859"}
+      {
+        "requirement_id": 1,
+        "artifact_id": 1,
+        "classification": "FULL",
+        "code": 3,
+        "transaction": "0xb4c7c40422ec7d9fcace4ed508a77f190eee03fee6b35646d634c2e91a42c233"
+      },
+      {
+        "requirement_id": 1,
+        "artifact_id": 2,
+        "classification": "FULL",
+        "code": 3,
+        "transaction": "0xbb015a13cd5e91bcd210ed8e45af58aff8295630e485a914e96be3bf08520087"
+      },
+      {
+        "requirement_id": 2,
+        "artifact_id": 1,
+        "classification": "FULL",
+        "code": 3,
+        "transaction": "0xa42add3b79c074ecb5a3d65a5ae1e9151b62c2c18b535d29875461107f3c7fc2"
+      },
+      {
+        "requirement_id": 2,
+        "artifact_id": 2,
+        "classification": "FULL",
+        "code": 3,
+        "transaction": "0x549a7bfba88bed9e04e1b53cbc518eba0c220375ccf1fe74e783935aea2e8859"
+      }
     ],
     "pair_assessments": [
-      {"requirement_id": 1, "left_artifact_id": 1, "right_artifact_id": 2, "classification": "NO_CONFLICT", "code": 1, "transaction": "0x4bd2ac98f5d0a3b4a32e38964aa2ec09424cf7113da2527303b1017ef4470536"},
-      {"requirement_id": 2, "left_artifact_id": 1, "right_artifact_id": 2, "classification": "NO_CONFLICT", "code": 1, "transaction": "0xb45f867468f89b9ce728ddc27dec8e626135f017ef07fb58375502823e9a5f59"}
+      {
+        "requirement_id": 1,
+        "left_artifact_id": 1,
+        "right_artifact_id": 2,
+        "classification": "NO_CONFLICT",
+        "code": 1,
+        "transaction": "0x4bd2ac98f5d0a3b4a32e38964aa2ec09424cf7113da2527303b1017ef4470536"
+      },
+      {
+        "requirement_id": 2,
+        "left_artifact_id": 1,
+        "right_artifact_id": 2,
+        "classification": "NO_CONFLICT",
+        "code": 1,
+        "transaction": "0xb45f867468f89b9ce728ddc27dec8e626135f017ef07fb58375502823e9a5f59"
+      }
     ],
     "transactions": {
       "create_schema": "0x02b2b26cea92e80053e1bec510b734c71cfdea22750dd10d3c5aa609373a7084",
@@ -91,19 +158,31 @@
       "consensus": "MAJORITY_AGREE",
       "execution": "SUCCESS",
       "was_executed": true,
-      "receipt": {"package_id": 1, "schema_hash": "fd02d81e0d77de329d8dee8ba7d8520f03f0fe378e9ef3086a7e73c9ff07b180", "package_hash": "2bbe1b8a4bac34ae2a4975dcc0cb8d1d17d0103846ee54fb16de73e12993a04d", "snapshot_hash": "1de0db8d9289efb975ffca6e21f2e7cff2d7e49b347c17f947b122179f0eff7b"}
+      "receipt": {
+        "package_id": 1,
+        "schema_hash": "fd02d81e0d77de329d8dee8ba7d8520f03f0fe378e9ef3086a7e73c9ff07b180",
+        "package_hash": "2bbe1b8a4bac34ae2a4975dcc0cb8d1d17d0103846ee54fb16de73e12993a04d",
+        "snapshot_hash": "1de0db8d9289efb975ffca6e21f2e7cff2d7e49b347c17f947b122179f0eff7b"
+      }
     }
   },
   "negative_lifecycle": {
     "package_id": 2,
     "schema_id": 1,
-    "artifact": {"artifact_id": 3, "name": "ownership_only.txt", "digest": "ea57ae2f789f9f7aaabd7b91f9ed1e153dbf9247d31d397a5f905fc2990e2740"},
+    "artifact": {
+      "artifact_id": 3,
+      "name": "ownership_only.txt",
+      "digest": "ea57ae2f789f9f7aaabd7b91f9ed1e153dbf9247d31d397a5f905fc2990e2740"
+    },
     "schema_hash": "fd02d81e0d77de329d8dee8ba7d8520f03f0fe378e9ef3086a7e73c9ff07b180",
     "package_hash": "4b9e9e16dbd77a6519ed5acd600ed6587f1266858245548ea9d4614d7240bf9f",
     "snapshot_hash": "54df873b451e8e045deb6efff97d1c491657d97265eab80db2d4b4382123c4ae",
     "package_status": "INCOMPLETE",
     "package_status_code": 3,
-    "requirement_statuses": {"OWNERS": 3, "FINANCES": 1},
+    "requirement_statuses": {
+      "OWNERS": 3,
+      "FINANCES": 1
+    },
     "finance_edge_code": 1,
     "transactions": {
       "create_package": "0x023146637e2b7af692365b9b1d5eac4d76f8a6e61c310a3fdb92d3862bd92ba7",
@@ -154,14 +233,92 @@
   "local_checks": {
     "python_compileall": "passed",
     "preflight": "passed",
-    "unit_tests": {"passed": 4, "failed": 0},
-    "direct_mode_tests": {"passed": 19, "failed": 0},
-    "genvm_lint_check": {"coverage_seal": "passed", "coverage_gate": "passed", "runner": "v0.3.0-rc7"}
+    "unit_tests": {
+      "passed": 4,
+      "failed": 0
+    },
+    "direct_mode_tests": {
+      "passed": 19,
+      "failed": 0
+    },
+    "genvm_lint_check": {
+      "coverage_seal": "passed",
+      "coverage_gate": "passed",
+      "runner": "v0.3.0-rc7"
+    }
   },
   "limitations": [
     "An earlier two-requirement attempt produced a malformed semantic response; it was classified AMBIGUOUS and finalization correctly rolled back. The later prompt change specifies exact JSON keys and the corrected two-requirement lifecycle completed.",
     "The conflict-specific incidents_clear/incidents_conflicting live lifecycle was not run; the required negative missing-evidence lifecycle was run and finalized.",
     "StudioNet does not expose gen_getTransactionLifecycle; finality was verified from receipt-backed status using GenLayerJS 2.0.0-rc.1.",
     "The linter reports a newer runner is available; the deployed code remains pinned to the v0.3.0-rc7 runner validated by Direct Mode."
-  ]
+  ],
+  "conflict_lifecycle": {
+    "schema_id": 2,
+    "requirement_id": 3,
+    "requirement_key": "INCIDENTS",
+    "requirement": "Describe production incidents in 2025, including whether any occurred",
+    "package_id": 3,
+    "artifacts": [
+      {
+        "artifact_id": 4,
+        "name": "incidents_clear.txt",
+        "digest": "892757bcba9d8d99e19c63b90a1c0d1b49fd22388df30e472e5efd221b696d8e"
+      },
+      {
+        "artifact_id": 5,
+        "name": "incidents_conflicting.txt",
+        "digest": "fe5a3231e59d9920530f517bb92b367f5e10fd98f22a70eec326ffee3dffd1a2"
+      }
+    ],
+    "schema_hash": "da466f3bad3a698dc079daf944caff67735762bf54cb786a043c024589596904",
+    "package_hash": "b0603a4830fbed47f8af156e811a2769038620e174466e5b3fda86ecab8aafaf",
+    "snapshot_hash": "696e08b23fd979f286d90f3da7e6cad519d76f7ad2b72ca3babdb638ab886b8f",
+    "edge_assessments": [
+      {
+        "artifact_id": 4,
+        "classification": "FULL",
+        "code": 3,
+        "transaction": "0x753913b231888bb1e6b483c192768348451150604b00de33a819bc9c4175ae77",
+        "quote": "No security incidents affected production systems during 2025."
+      },
+      {
+        "artifact_id": 5,
+        "classification": "FULL",
+        "code": 3,
+        "transaction": "0x381dc8c3fc2129b8b2a08f94bff2949964b81c0922ba0374dd808628c5701ca3",
+        "quote": "A production security incident occurred on March 14, 2025, affecting user authentication."
+      }
+    ],
+    "pair_assessment": {
+      "classification": "CONTRADICTS",
+      "code": 2,
+      "transaction": "0x79c6ca593a25e6d424334c1fe234cec17131b410d1a571eb8e6d97de3d01627b",
+      "quote_left": "No security incidents affected production systems during 2025.",
+      "quote_right": "A production security incident occurred on March 14, 2025, affecting user authentication."
+    },
+    "requirement_status": "CONFLICTED",
+    "requirement_status_code": 4,
+    "conflicts": 1,
+    "unresolved": false,
+    "package_status": "INCOMPLETE",
+    "package_status_code": 3,
+    "is_complete_exact_pins": false,
+    "transactions": {
+      "create_schema": "0x7fc01b476066d7199762ffd40e801b2e5e2af9047b8ed0356273fb57f7209b18",
+      "add_requirement": "0xaa08b06ab7bd103bc386250f55dc488ce03ff4136787ef2475f5d80a565efe11",
+      "seal_schema": "0xa0f2ad4083d19c2d1dbfc2151c3d573864ceafddc39b305af796a9d22184d35f",
+      "create_package": "0x74560e5983114ac5b8c7eccb4dcfd52033f6e57bd25097ea21642ad96bb60487",
+      "add_incidents_clear": "0x5563fa9ae66e414aa09e3a8e4a338d34a6f0956e7f6ba4153cc8840a9ef4268c",
+      "add_incidents_conflicting": "0xbe66b3eda3613a64a37cfeebdbb69b42b4f5c25b622a216b73660fcb4dd341d8",
+      "seal_package": "0xe912d806943c2a9ea463b0d9f59dfa74c6a80c68198f4de1cc125dfb21188f1b",
+      "assess_incidents_clear": "0x753913b231888bb1e6b483c192768348451150604b00de33a819bc9c4175ae77",
+      "assess_incidents_conflicting": "0x381dc8c3fc2129b8b2a08f94bff2949964b81c0922ba0374dd808628c5701ca3",
+      "assess_pair": "0x79c6ca593a25e6d424334c1fe234cec17131b410d1a571eb8e6d97de3d01627b",
+      "finalize_package": "0xa6ccf32cbb502e928d123e25e236d1aad153f0eb30693436c40da621bab7d8a9"
+    },
+    "transactions_status": "FINALIZED",
+    "transactions_consensus": "MAJORITY_AGREE",
+    "successful_execution": "SUCCESS"
+  }
 }

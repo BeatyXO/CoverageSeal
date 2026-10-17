@@ -14,7 +14,7 @@ The two pinned documents each support both required dimensions: Atlas Labs owner
 
 - A package containing only `ownership_only.txt` leaves required `FINANCES` missing and finalizes `INCOMPLETE` (status 3), not `COMPLETE`.
 - `PARTIAL` under `REQUIRE_FULL` does not satisfy the requirement.
-- The live conflict-specific incident scenario was not run. To extend the demo, assess `incidents_clear.txt` and `incidents_conflicting.txt` against `Describe production incidents in 2025`; assess their pair only if both edges are positive, and record only the actual consensus result.
+- `incidents_clear.txt` and `incidents_conflicting.txt` both returned `FULL`; their pair returned `CONTRADICTS` with excerpts from both sources. The requirement finalized `CONFLICTED` and the package finalized `INCOMPLETE`.
 - Changing source content without changing expected digest returns `UNAVAILABLE` (edge 5).
 - The live gate rejected a wrong package hash, a replayed action hash, and the finalized incomplete package. Each transaction finalized with the expected rollback reason.
 

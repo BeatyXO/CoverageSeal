@@ -27,6 +27,10 @@ Certificate pins:
 
 Package `2` contains only the pinned `ownership_only.txt` fixture. Its ownership requirement is `COVERED` (`3`); its finance requirement is `MISSING` (`1`), with no unresolved assessment. Finalization succeeded and set package status `INCOMPLETE` (`3`), with snapshot `54df873b451e8e045deb6efff97d1c491657d97265eab80db2d4b4382123c4ae`. The CoverageGate rejected its exact pins.
 
+## Conflicting evidence
+
+Package `3` contains the pinned `incidents_clear.txt` and `incidents_conflicting.txt` documents. Both were assessed `FULL` (`3`) for requirement `INCIDENTS`; the pair returned `CONTRADICTS` (`2`) with a grounded excerpt from each report. Finalization succeeded with requirement status `CONFLICTED` (`4`), one conflict, no unresolved assessment, and package status `INCOMPLETE` (`3`). Its exact pins return false from `is_complete`. Schema/package/snapshot hashes and all finalized transaction receipts are in the proof JSON.
+
 ## Consumer gate
 
 CoverageGate accepted the one-time action `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa` against the complete certificate and persisted the executor, package ID, all three pins, and payload hash. Read-back confirms `was_executed=true`. Finalized rollback receipts prove:

@@ -19,6 +19,7 @@
 - [x] CoverageGate recorded a valid action with persisted execution receipt
 - [x] Wrong-pin, replay and incomplete-package actions finalized with expected rollback reasons
 - [x] Required-missing finance package finalized `INCOMPLETE`
+- [x] Two positively covering incident reports returned `CONTRADICTS`; requirement finalized `CONFLICTED` and package `INCOMPLETE`
 - [x] Transaction IDs, receipt finality, consensus and execution outcomes recorded in `verified-studionet.json`
 - [x] `python scripts/preflight.py --final` passes against the proof record
 

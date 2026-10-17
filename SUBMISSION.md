@@ -10,6 +10,6 @@
 
 **Composability:** `CoverageGate` proves a different IC can block an action until a specific sealed package and schema have a `COMPLETE` snapshot. Query takes all three hashes to prevent replay against a different definition or package snapshot.
 
-**Verified reviewer evidence:** successful Direct Mode matrix/hostile tests; finalized CoverageSeal and CoverageGate on stable 61999; finalized COMPLETE and required-missing INCOMPLETE packages; exact/wrong certificate pins; persisted gate action, wrong-pin rejection and replay rejection. The live conflicting-incident scenario was not run. See `DEPLOYMENT.md` and `proof/verified-studionet.json` for transaction evidence.
+**Verified reviewer evidence:** successful Direct Mode matrix/hostile tests; finalized CoverageSeal and CoverageGate on stable 61999; finalized COMPLETE, required-missing INCOMPLETE, and contradictory-evidence INCOMPLETE packages; exact/wrong certificate pins; persisted gate action, wrong-pin rejection and replay rejection. See `DEPLOYMENT.md` and `proof/verified-studionet.json` for transaction evidence.
 
-**Limitations:** This is semantic coverage, not guaranteed fact truth, source independence, legal/compliance attestation or general proof of correctness. Onchain semantic costs are bounded by small matrix limits. The conflict-specific live scenario remains unverified; the successful and missing-evidence lifecycles are finalized and recorded.
+**Limitations:** This is semantic coverage, not guaranteed fact truth, source independence, legal/compliance attestation or general proof of correctness. Onchain semantic costs are bounded by small matrix limits.
