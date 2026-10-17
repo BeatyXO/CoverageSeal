@@ -1,35 +1,53 @@
-# Deployment evidence — not yet executed
+# Stable StudioNet deployment and lifecycle proof
 
-**Target:** stable StudioNet `studionet`, `https://studio.genlayer.com/api`, chain ID **61999**.
+**Network:** stable `studionet`, chain ID **61999**, RPC `https://studio.genlayer.com/api`.
 
-No deployed addresses, tx hashes, consensus success counts, fee proof, or live gate executions were produced for this handoff ZIP. **Do not invent any of them.**
+## Corrected deployments
+
+| Contract | Address | Finalized deployment transaction |
+| --- | --- | --- |
+| CoverageSeal | [`0xEcC5472b8288792B0F70aEceB48Ce6fF5dd75669`](https://explorer-studio.genlayer.com/address/0xEcC5472b8288792B0F70aEceB48Ce6fF5dd75669) | [`0xc80330b8fc12bbfe63524d5ee1c42e515a03fef0059af3b0d449f72e917bd906`](https://explorer-studio.genlayer.com/tx/0xc80330b8fc12bbfe63524d5ee1c42e515a03fef0059af3b0d449f72e917bd906) |
+| CoverageGate | [`0xa5e61fB8F2Ef138b291bD42d77Be1692A3fA1EcD`](https://explorer-studio.genlayer.com/address/0xa5e61fB8F2Ef138b291bD42d77Be1692A3fA1EcD) | [`0x78cc5e874347f33297a324abe2b7fe13a5a64f00e0ffcabaf3b51d9734a81d3d`](https://explorer-studio.genlayer.com/tx/0x78cc5e874347f33297a324abe2b7fe13a5a64f00e0ffcabaf3b51d9734a81d3d) |
+
+Both deploy receipts are `FINALIZED`, `MAJORITY_AGREE`, with successful execution. CoverageGate was constructed with the corrected CoverageSeal address above. The earlier deployment pair is superseded; the proof JSON records the corrected pair as canonical.
+
+## Complete two-dimension lifecycle
+
+Schema `1` requires `OWNERS` and `FINANCES` under `REQUIRE_FULL`. Package `1` contains the pinned `ownership.txt` and `finances.txt` fixtures from commit `1ddcce53a43099fa25ec651a1bc06646f4a4771d`. All four requirement/artifact edges returned `FULL` (`3`), and both positive artifact pairs returned `NO_CONFLICT` (`1`). Package finalization returned snapshot `1de0db8d9289efb975ffca6e21f2e7cff2d7e49b347c17f947b122179f0eff7b` and status `COMPLETE` (`2`). Both requirement summaries are `COVERED` (`3`), with zero conflicts or unresolved edges.
+
+Certificate pins:
+
+- Definition/schema hash: `fd02d81e0d77de329d8dee8ba7d8520f03f0fe378e9ef3086a7e73c9ff07b180`
+- Manifest/package hash: `2bbe1b8a4bac34ae2a4975dcc0cb8d1d17d0103846ee54fb16de73e12993a04d`
+- Final snapshot hash: `1de0db8d9289efb975ffca6e21f2e7cff2d7e49b347c17f947b122179f0eff7b`
+
+`is_complete` returns true for this exact package ID and triple hash pin, false for a substituted package hash, the exact pins of the incomplete package, and unknown package ID `99`.
+
+## Required evidence missing
+
+Package `2` contains only the pinned `ownership_only.txt` fixture. Its ownership requirement is `COVERED` (`3`); its finance requirement is `MISSING` (`1`), with no unresolved assessment. Finalization succeeded and set package status `INCOMPLETE` (`3`), with snapshot `54df873b451e8e045deb6efff97d1c491657d97265eab80db2d4b4382123c4ae`. The CoverageGate rejected its exact pins.
+
+## Consumer gate
+
+CoverageGate accepted the one-time action `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa` against the complete certificate and persisted the executor, package ID, all three pins, and payload hash. Read-back confirms `was_executed=true`. Finalized rollback receipts prove:
+
+- Wrong package hash: `coverage certificate missing or mismatched`.
+- Reused action hash: `action replay`.
+- Incomplete package certificate: `coverage certificate missing or mismatched`.
+
+All transaction IDs, receipts, edge results, and deployment metadata are in [`proof/verified-studionet.json`](proof/verified-studionet.json). Every transaction described there was checked with GenLayerJS `2.0.0-rc.1` and is `FINALIZED`; successful operations have leader execution `SUCCESS`, and expected gate rejections have leader execution `ERROR` with the rollback reason shown.
+
+## Fixtures and local checks
+
+The five immutable raw URLs are pinned to the pushed fixture commit above. A fresh fetch of each URL matched its manifest Keccak-256 digest.
 
 ```bash
-genlayer network set studionet
-genlayer network info   # verify effective RPC and chain ID 61999 BEFORE each deploy/write
-genlayer deploy --contract contracts/coverage_seal.py
-# after recording a finalized CoverageSeal address:
-genlayer network info
-genlayer deploy --contract contracts/coverage_gate.py --args '<FINALIZED_COVERAGESEAL_ADDRESS>'
+python scripts/preflight.py --final
+python -m compileall -q contracts scripts tests
+python -m pytest tests/unit -q
+python -m pytest tests/direct -q
+GENVM_VERSION=v0.3.0-rc7 genvm-lint check contracts/coverage_seal.py
+GENVM_VERSION=v0.3.0-rc7 genvm-lint check contracts/coverage_gate.py
 ```
 
-For test calls see `docs/REVIEWER_DEMO.md`. Use supported StudioNet fees if required by the installed stable tooling. Wait for finality and verify tx execution status before proceeding. **Never switch to studio-dev (61997) merely to work around fee/SDK issues.**
-
-## To fill with real evidence after completion
-
-- Source git commit SHA and pinned fixture commit SHA:
-- Final CoverageSeal contract address, deploy transaction, finalized state:
-- Schema creation, requirement creation, schema seal tx IDs / schema hash:
-- Package creation, artifact registration, package seal tx IDs / package hash:
-- Edge and pair assessment tx IDs, with source digests and consensus status:
-- Finalization tx ID / package status / snapshot hash:
-- CoverageGate address and deploy tx ID:
-- Successful pin-correct gate action tx ID:
-- Wrong-hash rejection tx ID/error:
-- Replay rejection tx ID/error:
-- Incomplete/conflicted proof tx IDs:
-- Exact Direct Mode command and real results:
-- Exact preflight command and real results:
-- CLI/SDK versions, network details, fee path used:
-
-Once genuinely verified, record `proof/verified-studionet.json` with live addresses, chain ID 61999, and links to actual explorer transactions, run `python scripts/preflight.py --final`, then push the final commit.
+The recorded local results are 4 unit tests and 19 Direct Mode tests passing; both contracts pass `genvm-lint check` against the pinned v0.3.0-rc7 runner. The linter reports a newer runner is available. The StudioNet endpoint does not expose `gen_getTransactionLifecycle`, so finality was confirmed from receipt-backed transaction status.
