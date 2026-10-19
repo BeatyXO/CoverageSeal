@@ -2,6 +2,7 @@
 """A real IC consumer: only a pin-matched COMPLETE snapshot unlocks a one-time action."""
 from genlayer import *
 from dataclasses import dataclass
+from typing import Any
 
 @gl.contract_interface
 class ICoverageSeal:
@@ -43,12 +44,12 @@ class CoverageGate(gl.Contract):
         self.executions[action_hash] = Execution(gl.message.sender_address, package_id, schema_hash, package_hash, snapshot_hash, payload_hash)
         self.executed_count = u256(int(self.executed_count) + 1)
 
-    @gl.public.view
+    @gl.public.view  # pyright: ignore[reportUnknownMemberType] -- SDK decorator lacks annotations
     def was_executed(self, action_hash: str) -> bool:
         return action_hash in self.executions
 
-    @gl.public.view
-    def get_execution(self, action_hash: str) -> dict:
+    @gl.public.view  # pyright: ignore[reportUnknownMemberType] -- SDK decorator lacks annotations
+    def get_execution(self, action_hash: str) -> dict[str, Any]:
         if action_hash not in self.executions:
             raise gl.vm.UserError('unknown action')
         a = self.executions[action_hash]

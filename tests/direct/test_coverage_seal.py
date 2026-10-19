@@ -263,3 +263,39 @@ def test_unauthorized_package_cannot_finalize(direct_vm, direct_deploy, direct_b
     with direct_vm.prank(direct_bob):
         with direct_vm.expect_revert('not finalizable'):
             c.finalize_package(pid)
+
+
+def test_conflict_cannot_hide_unassessed_artifact(direct_vm, direct_deploy):
+    c = direct_deploy(C, sdk_version='v0.3.0-rc7')
+    sid = c.create_schema('Complete assessment', BASE)
+    rid = c.add_requirement(sid, 'OWNERS', 'Identify owners and percentages', 1, 0)
+    sh = c.seal_schema(sid)
+    pid = c.create_package(sid, sh)
+    contrary = 'Cara owns 100 percent of Atlas Labs.'
+    a = c.add_artifact(pid, 'first', URL_A, digest(TEXT_A))
+    b = c.add_artifact(pid, 'second', URL_B, digest(contrary))
+    third_url = BASE + 'third.txt'
+    third_text = 'Additional evidence remains unassessed.'
+    third = c.add_artifact(pid, 'third', third_url, digest(third_text))
+    c.seal_package(pid)
+    mock_edge(direct_vm, 3, TEXT_A)
+    c.assess_artifact(pid, rid, a)
+    direct_vm.clear_mocks()
+    mock_edge(direct_vm, 3, contrary, URL_B, contrary)
+    c.assess_artifact(pid, rid, b)
+    direct_vm.clear_mocks()
+    direct_vm.mock_web(r'ownership\.txt', {'status': 200, 'body': TEXT_A})
+    direct_vm.mock_web(r'finances\.txt', {'status': 200, 'body': contrary})
+    direct_vm.mock_llm('COVERAGESEAL / REQUIREMENT CONTRADICTION', json.dumps({
+        'code': 2, 'quote_left': TEXT_A, 'quote_right': contrary, 'reason': 'conflict'}))
+    c.assess_pair(pid, rid, a, b)
+    detail = c.get_requirement_status(pid, rid)
+    assert detail['status'] == 4 and detail['unresolved'] is True
+    with direct_vm.expect_revert('unresolved coverage'):
+        c.finalize_package(pid)
+    assert c.get_package(pid)['status'] == 1
+    direct_vm.clear_mocks()
+    mock_edge(direct_vm, 1, '', third_url, third_text)
+    c.assess_artifact(pid, rid, third)
+    c.finalize_package(pid)
+    assert c.get_package(pid)['status'] == 3

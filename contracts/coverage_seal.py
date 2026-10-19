@@ -7,6 +7,7 @@ The contract, never an LLM, derives requirement and package status.
 from genlayer import *
 from dataclasses import dataclass
 import json
+from typing import Any, cast
 
 REQUIRE_FULL = 1
 COMBINE_PARTIAL = 2
@@ -42,7 +43,7 @@ def _hash(value: str) -> str:
     return Keccak256(value.encode('utf-8')).hexdigest()
 
 
-def _json(value: dict) -> str:
+def _json(value: dict[str, Any]) -> str:
     return json.dumps(value, sort_keys=True, separators=(',', ':'), ensure_ascii=True)
 
 
@@ -96,7 +97,7 @@ def _safe_source_url(url: str, prefix: str) -> bool:
     return all(c in 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/-._~' for c in path)
 
 
-def _key(*numbers) -> str:
+def _key(*numbers: object) -> str:
     return ':'.join(str(n) for n in numbers)
 
 
@@ -104,15 +105,15 @@ def _quote_in(quote: str, source: str) -> bool:
     return bool(quote) and len(quote) <= MAX_QUOTE and ' '.join(quote.split()).casefold() in ' '.join(source.split()).casefold()
 
 
-def _safe_json(raw):
+def _safe_json(raw: Any) -> dict[str, Any]:
     try:
         value = json.loads(raw) if isinstance(raw, str) else raw
-        return value if isinstance(value, dict) else {}
+        return cast(dict[str, Any], value) if isinstance(value, dict) else {}
     except Exception:
         return {}
 
 
-def _fetch(url: str, expected_digest: str) -> dict:
+def _fetch(url: str, expected_digest: str) -> dict[str, Any]:
     """Called inside independent nondet executions only; never touch storage."""
     try:
         response = gl.nondet.web.get(url)
@@ -131,7 +132,7 @@ def _fetch(url: str, expected_digest: str) -> dict:
         return {'ok': False, 'digest': '', 'text': ''}
 
 
-def _edge_once(requirement: str, url: str, digest: str) -> dict:
+def _edge_once(requirement: str, url: str, digest: str) -> dict[str, Any]:
     observed = _fetch(url, digest)
     if not observed['ok']:
         return {'code': UNAVAILABLE, 'quote': '', 'reason': 'source missing, changed or unreachable', 'source_digest': observed['digest']}
@@ -147,7 +148,7 @@ def _edge_once(requirement: str, url: str, digest: str) -> dict:
         'REQUIREMENT: ' + requirement + '\nSOURCE TEXT:\n' + observed['text']
     )
     result = _safe_json(gl.nondet.exec_prompt(prompt, response_format='json'))
-    if not isinstance(result, dict) or set(result) != {'code', 'quote', 'reason'}:
+    if not isinstance(cast(Any, result), dict) or set(result) != {'code', 'quote', 'reason'}:
         return {'code': AMBIGUOUS, 'quote': '', 'reason': 'malformed semantic response', 'source_digest': observed['digest']}
     code, quote, reason = result.get('code'), result.get('quote'), result.get('reason')
     if (not isinstance(code, int) or isinstance(code, bool) or not isinstance(quote, str) or
@@ -160,7 +161,7 @@ def _edge_once(requirement: str, url: str, digest: str) -> dict:
     return {'code': code, 'quote': quote, 'reason': reason, 'source_digest': observed['digest']}
 
 
-def _pair_once(requirement: str, left_url: str, left_digest: str, right_url: str, right_digest: str) -> dict:
+def _pair_once(requirement: str, left_url: str, left_digest: str, right_url: str, right_digest: str) -> dict[str, Any]:
     left = _fetch(left_url, left_digest)
     right = _fetch(right_url, right_digest)
     if not left['ok'] or not right['ok']:
@@ -176,7 +177,7 @@ def _pair_once(requirement: str, left_url: str, left_digest: str, right_url: str
         'REQUIREMENT: ' + requirement + '\nSOURCE LEFT:\n' + left['text'] + '\nSOURCE RIGHT:\n' + right['text']
     )
     value = _safe_json(gl.nondet.exec_prompt(prompt, response_format='json'))
-    if not isinstance(value, dict) or set(value) != {'code', 'quote_left', 'quote_right', 'reason'}:
+    if not isinstance(cast(Any, value), dict) or set(value) != {'code', 'quote_left', 'quote_right', 'reason'}:
         return {'code': PAIR_AMBIGUOUS, 'quote_left': '', 'quote_right': '', 'reason': 'malformed semantic response', 'left_digest': left['digest'], 'right_digest': right['digest']}
     code, ql, qr, reason = value.get('code'), value.get('quote_left'), value.get('quote_right'), value.get('reason')
     if (not isinstance(code, int) or isinstance(code, bool) or
@@ -191,13 +192,13 @@ def _pair_once(requirement: str, left_url: str, left_digest: str, right_url: str
     return {'code': code, 'quote_left': ql, 'quote_right': qr, 'reason': reason, 'left_digest': left['digest'], 'right_digest': right['digest']}
 
 
-def _edge_consensus(requirement: str, url: str, digest: str) -> dict:
-    def leader_fn():
+def _edge_consensus(requirement: str, url: str, digest: str) -> dict[str, Any]:
+    def leader_fn() -> dict[str, Any]:
         return _edge_once(requirement, url, digest)
-    def validator_fn(leader_result):
-        if not isinstance(leader_result, gl.vm.Return) or not isinstance(leader_result.calldata, dict):
+    def validator_fn(leader_result: Any) -> bool:
+        if not isinstance(leader_result, gl.vm.Return) or not isinstance(cast(Any, leader_result).calldata, dict):
             return False
-        candidate = leader_result.calldata
+        candidate = cast(dict[str, Any], cast(Any, leader_result).calldata)
         if set(candidate) != {'code', 'quote', 'reason', 'source_digest'}:
             return False
         independent = _edge_once(requirement, url, digest)
@@ -214,8 +215,8 @@ def _edge_consensus(requirement: str, url: str, digest: str) -> dict:
         elif candidate.get('quote') != '':
             return False
         return candidate.get('code') == independent['code'] and candidate.get('source_digest') == independent['source_digest']
-    result = gl.vm.run_nondet_unsafe(leader_fn, validator_fn)
-    if not isinstance(result, dict) or result.get('code') not in (NONE, PARTIAL, FULL, AMBIGUOUS, UNAVAILABLE):
+    result = gl.vm.run_nondet_unsafe(leader_fn, validator_fn)  # pyright: ignore[reportUnknownMemberType] -- SDK generic boundary
+    if not isinstance(cast(Any, result), dict) or result.get('code') not in (NONE, PARTIAL, FULL, AMBIGUOUS, UNAVAILABLE):
         raise gl.vm.UserError('consensus: invalid coverage result')
     if result['code'] in (PARTIAL, FULL):
         if not isinstance(result.get('quote'), str) or not result['quote']:
@@ -223,13 +224,13 @@ def _edge_consensus(requirement: str, url: str, digest: str) -> dict:
     return result
 
 
-def _pair_consensus(requirement: str, lurl: str, ld: str, rurl: str, rd: str) -> dict:
-    def leader_fn():
+def _pair_consensus(requirement: str, lurl: str, ld: str, rurl: str, rd: str) -> dict[str, Any]:
+    def leader_fn() -> dict[str, Any]:
         return _pair_once(requirement, lurl, ld, rurl, rd)
-    def validator_fn(leader_result):
-        if not isinstance(leader_result, gl.vm.Return) or not isinstance(leader_result.calldata, dict):
+    def validator_fn(leader_result: Any) -> bool:
+        if not isinstance(leader_result, gl.vm.Return) or not isinstance(cast(Any, leader_result).calldata, dict):
             return False
-        candidate = leader_result.calldata
+        candidate = cast(dict[str, Any], cast(Any, leader_result).calldata)
         if set(candidate) != {'code', 'quote_left', 'quote_right', 'reason', 'left_digest', 'right_digest'}:
             return False
         independent = _pair_once(requirement, lurl, ld, rurl, rd)
@@ -250,8 +251,8 @@ def _pair_consensus(requirement: str, lurl: str, ld: str, rurl: str, rd: str) ->
         return (candidate.get('code') == independent['code'] and
                 candidate.get('left_digest') == independent['left_digest'] and
                 candidate.get('right_digest') == independent['right_digest'])
-    result = gl.vm.run_nondet_unsafe(leader_fn, validator_fn)
-    if not isinstance(result, dict) or result.get('code') not in (NO_CONFLICT, CONTRADICTS, PAIR_AMBIGUOUS, PAIR_UNAVAILABLE):
+    result = gl.vm.run_nondet_unsafe(leader_fn, validator_fn)  # pyright: ignore[reportUnknownMemberType] -- SDK generic boundary
+    if not isinstance(cast(Any, result), dict) or result.get('code') not in (NO_CONFLICT, CONTRADICTS, PAIR_AMBIGUOUS, PAIR_UNAVAILABLE):
         raise gl.vm.UserError('consensus: invalid contradiction result')
     return result
 
@@ -321,17 +322,17 @@ class PairAssessment:
 class ICoverageSeal:
     class View:
         def is_complete(self, package_id: u256, schema_hash: str, package_hash: str, snapshot_hash: str) -> bool: ...
-        def get_package(self, package_id: u256) -> dict: ...
+        def get_package(self, package_id: u256) -> dict[str, Any]: ...
     class Write:
         pass
 
 
 class SchemaSealed(gl.Event):
-    def __init__(self, schema_id: u256, definition_hash: str, /, **blob): ...
+    def __init__(self, schema_id: u256, definition_hash: str, /, **blob: Any): ...
 
 
 class PackageFinalized(gl.Event):
-    def __init__(self, package_id: u256, status: u8, snapshot_hash: str, /, **blob): ...
+    def __init__(self, package_id: u256, status: u8, snapshot_hash: str, /, **blob: Any): ...
 
 
 class CoverageSeal(gl.Contract):
@@ -417,7 +418,7 @@ class CoverageSeal(gl.Contract):
             raise gl.vm.UserError('schema locked or unauthorized')
         if not schema.count:
             raise gl.vm.UserError('empty schema')
-        data = []
+        data: list[dict[str, Any]] = []
         for pos in range(1, int(schema.count) + 1):
             r = self.requirements[self._requirement_id(schema_id, pos)]
             data.append({'key': r.key, 'description': r.description, 'policy': int(r.policy), 'min_partial': int(r.min_partial)})
@@ -467,7 +468,7 @@ class CoverageSeal(gl.Contract):
             raise gl.vm.UserError('package locked or unauthorized')
         if not package.count:
             raise gl.vm.UserError('empty package')
-        artifacts = []
+        artifacts: list[dict[str, Any]] = []
         for pos in range(1, int(package.count) + 1):
             a = self.artifacts[self._artifact_id(package_id, pos)]
             artifacts.append({'name': a.name, 'url': a.url, 'digest': a.digest})
@@ -475,7 +476,7 @@ class CoverageSeal(gl.Contract):
         package.sealed = True
         return package.package_hash
 
-    def _require_member(self, package_id: u256, requirement_id: u256, artifact_id: u256) -> tuple:
+    def _require_member(self, package_id: u256, requirement_id: u256, artifact_id: u256) -> tuple[Requirement, Artifact]:
         package = self._package(package_id)
         if not package.sealed or int(package.status) != PKG_OPEN:
             raise gl.vm.UserError('package not open for assessment')
@@ -513,12 +514,12 @@ class CoverageSeal(gl.Contract):
         self.pairs[key] = PairAssessment(u8(result['code']), result.get('quote_left', ''), result.get('quote_right', ''), result.get('reason', ''))
         return u8(result['code'])
 
-    def _requirement_summary(self, package_id: u256, requirement_id: u256) -> dict:
+    def _requirement_summary(self, package_id: u256, requirement_id: u256) -> dict[str, Any]:
         package = self._package(package_id)
         requirement = self.requirements[requirement_id]
         full = 0
         partial = 0
-        positive_ids = []
+        positive_ids: list[u256] = []
         unresolved = False
         conflicts = 0
         for pos in range(1, int(package.count) + 1):
@@ -568,12 +569,12 @@ class CoverageSeal(gl.Contract):
         if not package.sealed or int(package.status) != PKG_OPEN or package.owner != gl.message.sender_address:
             raise gl.vm.UserError('package not finalizable')
         schema = self._schema(package.schema_id)
-        summary = []
+        summary: list[dict[str, Any]] = []
         complete = True
         for pos in range(1, int(schema.count) + 1):
             req_id = self._requirement_id(package.schema_id, pos)
             detail = self._requirement_summary(package_id, req_id)
-            if detail['status'] == UNRESOLVED:
+            if detail['unresolved']:
                 raise gl.vm.UserError('unresolved coverage or conflict evaluation')
             if detail['status'] == CONFLICTED or (detail['policy'] != OPTIONAL and detail['status'] != COVERED):
                 complete = False
@@ -583,68 +584,68 @@ class CoverageSeal(gl.Contract):
         PackageFinalized(package_id, package.status, package.snapshot_hash).emit()
         return package.snapshot_hash
 
-    @gl.public.view
-    def get_schema(self, schema_id: u256) -> dict:
+    @gl.public.view  # pyright: ignore[reportUnknownMemberType] -- SDK decorator lacks annotations
+    def get_schema(self, schema_id: u256) -> dict[str, Any]:
         schema = self._schema(schema_id)
         return {'name': schema.name, 'owner': str(schema.owner), 'source_prefix': schema.source_prefix, 'sealed': schema.sealed, 'count': int(schema.count), 'definition_hash': schema.definition_hash}
 
-    @gl.public.view
-    def get_requirement(self, requirement_id: u256) -> dict:
+    @gl.public.view  # pyright: ignore[reportUnknownMemberType] -- SDK decorator lacks annotations
+    def get_requirement(self, requirement_id: u256) -> dict[str, Any]:
         if requirement_id not in self.requirements:
             raise gl.vm.UserError('unknown requirement')
         r = self.requirements[requirement_id]
         return {'schema_id': int(r.schema_id), 'key': r.key, 'description': r.description, 'policy': int(r.policy), 'min_partial': int(r.min_partial)}
 
-    @gl.public.view
+    @gl.public.view  # pyright: ignore[reportUnknownMemberType] -- SDK decorator lacks annotations
     def get_requirement_id(self, schema_id: u256, ordinal: u32) -> u256:
         schema = self._schema(schema_id)
         if int(ordinal) < 1 or int(ordinal) > int(schema.count):
             raise gl.vm.UserError('requirement ordinal out of range')
         return self._requirement_id(schema_id, int(ordinal))
 
-    @gl.public.view
+    @gl.public.view  # pyright: ignore[reportUnknownMemberType] -- SDK decorator lacks annotations
     def get_artifact_id(self, package_id: u256, ordinal: u32) -> u256:
         package = self._package(package_id)
         if int(ordinal) < 1 or int(ordinal) > int(package.count):
             raise gl.vm.UserError('artifact ordinal out of range')
         return self._artifact_id(package_id, int(ordinal))
 
-    @gl.public.view
-    def get_artifact(self, artifact_id: u256) -> dict:
+    @gl.public.view  # pyright: ignore[reportUnknownMemberType] -- SDK decorator lacks annotations
+    def get_artifact(self, artifact_id: u256) -> dict[str, Any]:
         if artifact_id not in self.artifacts:
             raise gl.vm.UserError('unknown artifact')
         a = self.artifacts[artifact_id]
         return {'package_id': int(a.package_id), 'name': a.name, 'url': a.url, 'digest': a.digest}
 
-    @gl.public.view
-    def get_package(self, package_id: u256) -> dict:
+    @gl.public.view  # pyright: ignore[reportUnknownMemberType] -- SDK decorator lacks annotations
+    def get_package(self, package_id: u256) -> dict[str, Any]:
         p = self._package(package_id)
         return {'schema_id': int(p.schema_id), 'owner': str(p.owner), 'schema_hash': p.schema_hash, 'sealed': p.sealed, 'count': int(p.count), 'package_hash': p.package_hash, 'status': int(p.status), 'snapshot_hash': p.snapshot_hash}
 
-    @gl.public.view
-    def get_assessment(self, package_id: u256, requirement_id: u256, artifact_id: u256) -> dict:
+    @gl.public.view  # pyright: ignore[reportUnknownMemberType] -- SDK decorator lacks annotations
+    def get_assessment(self, package_id: u256, requirement_id: u256, artifact_id: u256) -> dict[str, Any]:
         key = _key(package_id, requirement_id, artifact_id)
         if key not in self.assessments:
             raise gl.vm.UserError('coverage edge not certified')
         a = self.assessments[key]
         return {'code': int(a.code), 'quote': a.quote, 'reason': a.reason, 'source_digest': a.source_digest}
 
-    @gl.public.view
-    def get_pair(self, package_id: u256, requirement_id: u256, left_id: u256, right_id: u256) -> dict:
+    @gl.public.view  # pyright: ignore[reportUnknownMemberType] -- SDK decorator lacks annotations
+    def get_pair(self, package_id: u256, requirement_id: u256, left_id: u256, right_id: u256) -> dict[str, Any]:
         key = _key(package_id, requirement_id, left_id, right_id)
         if key not in self.pairs:
             raise gl.vm.UserError('pair not certified')
         a = self.pairs[key]
         return {'code': int(a.code), 'quote_left': a.quote_left, 'quote_right': a.quote_right, 'reason': a.reason}
 
-    @gl.public.view
-    def get_requirement_status(self, package_id: u256, requirement_id: u256) -> dict:
+    @gl.public.view  # pyright: ignore[reportUnknownMemberType] -- SDK decorator lacks annotations
+    def get_requirement_status(self, package_id: u256, requirement_id: u256) -> dict[str, Any]:
         p = self._package(package_id)
         if requirement_id not in self.requirements or self.requirements[requirement_id].schema_id != p.schema_id:
             raise gl.vm.UserError('requirement not in package schema')
         return self._requirement_summary(package_id, requirement_id)
 
-    @gl.public.view
+    @gl.public.view  # pyright: ignore[reportUnknownMemberType] -- SDK decorator lacks annotations
     def is_complete(self, package_id: u256, schema_hash: str, package_hash: str, snapshot_hash: str) -> bool:
         if package_id not in self.packages:
             return False
