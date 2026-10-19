@@ -224,6 +224,7 @@ def test_validator_refetch_rejects_forged_quote_and_disagreement(direct_vm, dire
     assert direct_vm.run_validator(leader_result=candidate) is True
     forged = dict(candidate, quote='This sentence does not exist in the document.')
     assert direct_vm.run_validator(leader_result=forged) is False
+    assert direct_vm.run_validator(leader_result=dict(candidate, source_digest='0' * 64)) is False
 
     # Validator independently re-fetches and classifies; disagreement rejects.
     direct_vm.clear_mocks()
@@ -251,6 +252,15 @@ def test_contradictory_full_documents_block_completion(direct_vm, direct_deploy)
         'code': 2, 'quote_left': TEXT_A, 'quote_right': contradictory,
         'reason': 'incompatible shares'}))
     assert c.assess_pair(pid, rid, a, b) == 2
+    candidate = {
+        'code': 2, 'quote_left': TEXT_A, 'quote_right': contradictory,
+        'reason': 'incompatible shares', 'left_digest': digest(TEXT_A),
+        'right_digest': digest(contradictory),
+    }
+    assert direct_vm.run_validator(leader_result=candidate) is True
+    assert direct_vm.run_validator(leader_result=dict(candidate, quote_right='fabricated excerpt')) is False
+    assert direct_vm.run_validator(leader_result=dict(candidate, right_digest='0' * 64)) is False
+    assert direct_vm.run_validator(leader_result=dict(candidate, code=1, quote_left='', quote_right='')) is False
     assert c.get_requirement_status(pid, rid)['status'] == 4
     snap = c.finalize_package(pid)
     assert not c.is_complete(pid, sh, ph, snap)

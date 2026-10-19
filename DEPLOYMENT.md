@@ -1,57 +1,63 @@
 # Stable StudioNet deployment and lifecycle proof
 
-**Network:** stable `studionet`, chain ID **61999**, RPC `https://studio.genlayer.com/api`.
+**Network:** StudioNet only, chain ID **61999**, RPC `https://studio.genlayer.com/api`.
 
-## Corrected deployments
+Contract source revision: `447464f6b52d4942bd78e6c1a15a7b742617dcb2`. Final submission revision: `git rev-parse HEAD` after checkout of `main`.
+
+## Corrected deployment pair
+
+The finalization correction checks `detail['unresolved']` before snapshot creation, including when status is CONFLICTED. This genuine behavior change required redeployment. The earlier pair and its 38 reverified receipts remain in the archived proof; they are superseded.
 
 | Contract | Address | Finalized deployment transaction |
 | --- | --- | --- |
-| CoverageSeal | [`0xEcC5472b8288792B0F70aEceB48Ce6fF5dd75669`](https://explorer-studio.genlayer.com/address/0xEcC5472b8288792B0F70aEceB48Ce6fF5dd75669) | [`0xc80330b8fc12bbfe63524d5ee1c42e515a03fef0059af3b0d449f72e917bd906`](https://explorer-studio.genlayer.com/tx/0xc80330b8fc12bbfe63524d5ee1c42e515a03fef0059af3b0d449f72e917bd906) |
-| CoverageGate | [`0xa5e61fB8F2Ef138b291bD42d77Be1692A3fA1EcD`](https://explorer-studio.genlayer.com/address/0xa5e61fB8F2Ef138b291bD42d77Be1692A3fA1EcD) | [`0x78cc5e874347f33297a324abe2b7fe13a5a64f00e0ffcabaf3b51d9734a81d3d`](https://explorer-studio.genlayer.com/tx/0x78cc5e874347f33297a324abe2b7fe13a5a64f00e0ffcabaf3b51d9734a81d3d) |
+| coverage_seal | [0x9870C77C84DA42785B115457669dCccbfa77994D](https://explorer-studio.genlayer.com/address/0x9870C77C84DA42785B115457669dCccbfa77994D) | [0x9a635735c439a573ec42d5d4bbee0f98ee9df9de729f39dedf6c2af07ab4d455](https://explorer-studio.genlayer.com/tx/0x9a635735c439a573ec42d5d4bbee0f98ee9df9de729f39dedf6c2af07ab4d455) |
+| coverage_gate | [0x7498e0B11358C21d977727F6b9c21b5a88264867](https://explorer-studio.genlayer.com/address/0x7498e0B11358C21d977727F6b9c21b5a88264867) | [0x37a35f4098bafa025db6d00ce7f98f12a59f3661f554ecd781752866bf5da888](https://explorer-studio.genlayer.com/tx/0x37a35f4098bafa025db6d00ce7f98f12a59f3661f554ecd781752866bf5da888) |
 
-Both deploy receipts are `FINALIZED`, `MAJORITY_AGREE`, with successful execution. CoverageGate was constructed with the corrected CoverageSeal address above. The earlier deployment pair is superseded; the proof JSON records the corrected pair as canonical.
+Both deployments have FINALIZED status, MAJORITY_AGREE consensus and leader-mode SUCCESS execution. The decoded CoverageGate constructor pins the CoverageSeal address above; source inspection confirms this field is initialized once and never reassigned.
 
-## Complete two-dimension lifecycle
+## Deployed-source correspondence
 
-Schema `1` requires `OWNERS` and `FINANCES` under `REQUIRE_FULL`. Package `1` contains the pinned `ownership.txt` and `finances.txt` fixtures from commit `1ddcce53a43099fa25ec651a1bc06646f4a4771d`. All four requirement/artifact edges returned `FULL` (`3`), and both positive artifact pairs returned `NO_CONFLICT` (`1`). Package finalization returned snapshot `1de0db8d9289efb975ffca6e21f2e7cff2d7e49b347c17f947b122179f0eff7b` and status `COMPLETE` (`2`). Both requirement summaries are `COVERED` (`3`), with zero conflicts or unresolved edges.
+Sources were retrieved with `gen_getContractCode`, decoded from base64 as UTF-8, converted from CRLF/CR to LF, and given exactly one terminal LF. No other whitespace, annotation, comment or code changes are ignored. SHA-256 is computed over those UTF-8 bytes.
 
-Certificate pins:
+| Contract | Matching local and deployed SHA-256 |
+| --- | --- |
+| coverage_seal | `0958d56ba2316616332e36a4137d2305ddc4e3e6fcd150c94aed05511823ef0a` |
+| coverage_gate | `6b9e6ea227bd7e9ae10d7b13bd6b46e748eb5f91ed1277f391aff75161c8a934` |
 
-- Definition/schema hash: `fd02d81e0d77de329d8dee8ba7d8520f03f0fe378e9ef3086a7e73c9ff07b180`
-- Manifest/package hash: `2bbe1b8a4bac34ae2a4975dcc0cb8d1d17d0103846ee54fb16de73e12993a04d`
-- Final snapshot hash: `1de0db8d9289efb975ffca6e21f2e7cff2d7e49b347c17f947b122179f0eff7b`
+## Finalized live evidence
 
-`is_complete` returns true for this exact package ID and triple hash pin, false for a substituted package hash, the exact pins of the incomplete package, and unknown package ID `99`.
+| Case | Result | Final transaction |
+| --- | --- | --- |
+| Two requirements, two artifacts; all four edges and both positive pairs assessed | COMPLETE (2) | [0xf8006f2bf5dde1c7b6b1ff79804605e1b2ddd4f6c6f26c47765d0e5473bfcdfc](https://explorer-studio.genlayer.com/tx/0xf8006f2bf5dde1c7b6b1ff79804605e1b2ddd4f6c6f26c47765d0e5473bfcdfc) |
+| Required finance evidence missing | INCOMPLETE (3) | [0xb5f6f76efe0eb7914d807d9a496f9839ee81420dda0ace2f20fca5a73ed43abe](https://explorer-studio.genlayer.com/tx/0xb5f6f76efe0eb7914d807d9a496f9839ee81420dda0ace2f20fca5a73ed43abe) |
+| Two FULL incident reports; CONTRADICTS pair | CONFLICTED requirement (4), INCOMPLETE package (3) | [0xd71893d6d1d18c433335fc27e484d06a8cf7d98810caba1dc3381b84f337f840](https://explorer-studio.genlayer.com/tx/0xd71893d6d1d18c433335fc27e484d06a8cf7d98810caba1dc3381b84f337f840) |
+| Exact complete certificate | SUCCESS; execution receipt persisted | [0xfabb4b9bf6054425212e6a61e0883783aa5e532133c2b58e5fdc3771d1b78b55](https://explorer-studio.genlayer.com/tx/0xfabb4b9bf6054425212e6a61e0883783aa5e532133c2b58e5fdc3771d1b78b55) |
+| Wrong package hash | Rollback: coverage certificate missing or mismatched | [0x0f0c4454733f761f14f50277df923bd002a2ebee5a41eb438e964008e07893c9](https://explorer-studio.genlayer.com/tx/0x0f0c4454733f761f14f50277df923bd002a2ebee5a41eb438e964008e07893c9) |
+| Duplicate action hash | Rollback: action replay | [0xa870ff6dd46df9cc35e79045743deed7fd1af216de649d18ca07564437bad939](https://explorer-studio.genlayer.com/tx/0xa870ff6dd46df9cc35e79045743deed7fd1af216de649d18ca07564437bad939) |
+| Exact incomplete certificate | Rollback: coverage certificate missing or mismatched | [0x7f769823bf50e43c388dc89df81507f55015b24f320a6f414b4559cec237e210](https://explorer-studio.genlayer.com/tx/0x7f769823bf50e43c388dc89df81507f55015b24f320a6f414b4559cec237e210) |
 
-## Required evidence missing
+## Certificate pins
 
-Package `2` contains only the pinned `ownership_only.txt` fixture. Its ownership requirement is `COVERED` (`3`); its finance requirement is `MISSING` (`1`), with no unresolved assessment. Finalization succeeded and set package status `INCOMPLETE` (`3`), with snapshot `54df873b451e8e045deb6efff97d1c491657d97265eab80db2d4b4382123c4ae`. The CoverageGate rejected its exact pins.
+| Package | Schema | Manifest | Snapshot |
+| --- | --- | --- | --- |
+| complete | `9c03b9b84c7e93f6060d19c0c2ecef4bf88743e427fb4c8b5ccbc650f2d5053e` | `adff5c6906d20151552d12e965274bd4abb23b132eb6cd2ce0913bd5fabaee51` | `31a711fb8f391c9435e9b45bd67651a9dc117214c43f5ffbf1fb68367151f4fb` |
+| missing | `9c03b9b84c7e93f6060d19c0c2ecef4bf88743e427fb4c8b5ccbc650f2d5053e` | `828f5fab9ec765d5a0c158bc9628db6bd7c181b6a1e05856cedc6216bcea2bc9` | `082e20aec394c901fd1853739ab15ea57933f9c76039e2b70e059bce69930d4f` |
+| conflict | `aa6500b96905584406274b0055177a6c35f17f04ba44f7c518bb847f4f10309f` | `00ff8df21215a75d61cacee12d1b1e27c778e694819bac514ef32fcb95bfaf7e` | `333affb45a5e549f9481ffaecb971552be8675fad7c439635c10c7a2601e39e9` |
 
-## Conflicting evidence
+All 38 closeout transactions were re-read until FINALIZED. Receipt verification checks consensus and leader-mode execution separately; cancelled idle validators are not confused with the leader. Every rejection's result bytes have rollback discriminator 1 and the exact recorded reason. Finalized-state read-backs match the three certificates and persisted consumer action.
 
-Package `3` contains the pinned `incidents_clear.txt` and `incidents_conflicting.txt` documents. Both were assessed `FULL` (`3`) for requirement `INCIDENTS`; the pair returned `CONTRADICTS` (`2`) with a grounded excerpt from each report. Finalization succeeded with requirement status `CONFLICTED` (`4`), one conflict, no unresolved assessment, and package status `INCOMPLETE` (`3`). Its exact pins return false from `is_complete`. Schema/package/snapshot hashes and all finalized transaction receipts are in the proof JSON.
+The source, detailed edge/pair results, hashes and receipts are in [verified-studionet.json](proof/verified-studionet.json) and [closeout-journal.json](proof/closeout-journal.json). All five pinned fixture URLs were freshly fetched and matched the manifest Keccak-256 digests.
 
-## Consumer gate
+## Toolchain and checks
 
-CoverageGate accepted the one-time action `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa` against the complete certificate and persisted the executor, package ID, all three pins, and payload hash. Read-back confirms `was_executed=true`. Finalized rollback receipts prove:
+Python 3.12; GenLayer CLI 0.39.1; GenVM Linter 0.11.0; Testing Suite 0.29.2; official GenVM v0.3.0-rc7 `genvm-runners-all.tar.xz`, SHA-256 `e218a1854214681560351051f76fe2b878545cf3409455ef372d57014a88ca67`.
 
-- Wrong package hash: `coverage certificate missing or mismatched`.
-- Reused action hash: `action replay`.
-- Incomplete package certificate: `coverage certificate missing or mismatched`.
+[Engineering CI](https://github.com/BeatyXO/CoverageSeal/actions/runs/39218358805) succeeded on `447464f6b52d4942bd78e6c1a15a7b742617dcb2`. The final submission commit runs the same workflow: compilation; 4 unit tests; all 19 original Direct Mode tests plus 1 regression; final structural preflight; `check`, `validate`, `typecheck --strict`, and ABI generation for both contracts. Strict checking retains runtime validation and uses narrowly scoped annotations at untyped SDK boundaries.
 
-All transaction IDs, receipts, edge results, and deployment metadata are in [`proof/verified-studionet.json`](proof/verified-studionet.json). Every transaction described there was checked with GenLayerJS `2.0.0-rc.1` and is `FINALIZED`; successful operations have leader execution `SUCCESS`, and expected gate rejections have leader execution `ERROR` with the rollback reason shown.
+Run the Quick start in README to prepare the checksum-verified compatibility cache before Direct Mode. The archive is copied unchanged from the linter cache to the cache filename expected by Testing Suite 0.29.2.
 
-## Fixtures and local checks
+## Limits
 
-The five immutable raw URLs are pinned to the pushed fixture commit above. A fresh fetch of each URL matched its manifest Keccak-256 digest.
+`gen_getTransactionLifecycle` returns `-32601`, `Method not found: gen_getTransactionLifecycle`. Supported `eth_getTransactionByHash` receipts provide final status, consensus and leader execution. StudioNet transient HTML responses and its 30-request/minute rate limit were handled with read retries and a resumable transaction journal.
 
-```bash
-python scripts/preflight.py --final
-python -m compileall -q contracts scripts tests
-python -m pytest tests/unit -q
-python -m pytest tests/direct -q
-GENVM_VERSION=v0.3.0-rc7 genvm-lint check contracts/coverage_seal.py
-GENVM_VERSION=v0.3.0-rc7 genvm-lint check contracts/coverage_gate.py
-```
-
-The recorded local results are 4 unit tests and 19 Direct Mode tests passing; both contracts pass `genvm-lint check` against the pinned v0.3.0-rc7 runner. The linter reports a newer runner is available. The StudioNet endpoint does not expose `gen_getTransactionLifecycle`, so finality was confirmed from receipt-backed transaction status.
+CoverageSeal establishes semantic coverage against sealed requirements. It does not independently establish supplied documents as truthful, authoritative or genuinely independent. URL restrictions remain lexical and rely on the GenVM runtime for DNS and redirect controls.

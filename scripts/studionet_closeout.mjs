@@ -17,12 +17,25 @@ const { createClient, createAccount } = await load('node_modules/genlayer-js/dis
 const { studionet } = await load('node_modules/genlayer-js/dist/chains/index.js');
 const { CalldataAddress } = await load('node_modules/genlayer-js/dist/types/index.js');
 const endpoint = 'https://studio.genlayer.com/api';
+const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+async function retryRead(operation) {
+  for(let attempt=0;;attempt++) {
+    try { return await operation(); }
+    catch(error) {
+      if(attempt>=3) throw error;
+      console.log('Read failed; retrying after rate-limit window:',error.shortMessage ?? error.message);
+      await pause(60000);
+    }
+  }
+}
 async function rpc(method, params = []) {
+ return retryRead(async()=>{
   const response = await fetch(endpoint, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({jsonrpc:'2.0',id:1,method,params}) });
   if (!response.ok) throw Error(`RPC HTTP ${response.status}`);
   const data = await response.json();
   if (data.error) throw Error(`${method}: ${JSON.stringify(data.error)}`);
   return data.result;
+ });
 }
 // This is always the first RPC, before SDK reads, signing, or submission.
 assert.equal(Number(await rpc('eth_chainId')), 61999);
@@ -36,11 +49,11 @@ const old = JSON.parse(fs.readFileSync('proof/verified-studionet.json','utf8'));
 const journalFile = 'proof/closeout-journal.json';
 const journal = fs.existsSync(journalFile) ? JSON.parse(fs.readFileSync(journalFile,'utf8')) : {chain_id:61999, transactions:{}, reads:{}, sources:{}};
 const persist = () => save(journalFile, journal);
-async function receipt(hash, expected = 'SUCCESS') {
+async function receipt(hash, expected = 'SUCCESS', allowAccepted = false) {
   const start = Date.now();
   for (;;) {
     const tx = await rpc('eth_getTransactionByHash', [hash]);
-    if (tx?.status === 'FINALIZED') {
+    if (tx?.status === 'FINALIZED' || (allowAccepted && ['ACCEPTED','READY_TO_FINALIZE'].includes(tx?.status))) {
       const executions = tx.consensus_data?.leader_receipt;
       assert.ok(Array.isArray(executions), 'missing execution receipt');
       const leaders = executions.filter(r => r.mode === 'leader');
@@ -61,7 +74,8 @@ async function source(name, address) {
   return {address,normalization:'UTF-8; CRLF/CR to LF; exactly one terminal LF; no other whitespace or code changes',local_sha256:sha(local),deployed_sha256:sha(deployed),matches:canonical(local)===canonical(deployed)};
 }
 async function read(label,address,functionName,args=[]) {
-  const result = await client.readContract({address,functionName,args,jsonSafeReturn:true});
+  if (Object.hasOwn(journal.reads,label)) return journal.reads[label];
+  const result = await retryRead(()=>client.readContract({address,functionName,args,jsonSafeReturn:true}));
   journal.reads[label] = result; persist(); return result;
 }
 
@@ -90,12 +104,22 @@ client = createClient({chain:studionet,endpoint,account});
 async function transaction(label, submit, expected='SUCCESS') {
   if (!journal.transactions[label]) {
     assert.equal(Number(await rpc('eth_chainId')),61999);
+    await pause(5000);
     const hash = await submit();
     journal.transactions[label] = {hash,expected}; persist();
     console.log('Submitted',label,hash);
   }
   const entry = journal.transactions[label];
-  if (!entry.receipt) { entry.receipt = await receipt(entry.hash,expected); persist(); }
+  if (!entry.receipt) { entry.receipt = await receipt(entry.hash,expected,true); persist(); }
+  if (expected==='ERROR') {
+    const expectedReason=label==='consumer_replay'?'action replay':'coverage certificate missing or mismatched';
+    for (const leader of entry.receipt.leaders) {
+      const raw=Buffer.from(leader.result,'base64');
+      assert.equal(raw[0],1,'expected rollback result discriminator');
+      assert.equal(raw.subarray(1).toString('utf8'),expectedReason);
+    }
+    entry.reason=expectedReason; persist();
+  }
   console.log('Verified',label,entry.receipt.status,entry.receipt.execution);
   return entry.receipt;
 }
@@ -110,8 +134,12 @@ async function deploy(name,args=[]) {
   return address;
 }
 const seal=await deploy('coverage_seal');
-const gate=await deploy('coverage_gate',[new CalldataAddress(seal)]);
+const gate=await deploy('coverage_gate',[new CalldataAddress(Uint8Array.from(Buffer.from(seal.slice(2),'hex')))]);
 journal.coverage_seal_address=seal; journal.coverage_gate_address=gate; persist();
+const gateDeployment=await retryRead(()=>client.getTransaction({hash:journal.transactions.deploy_coverage_gate.hash}));
+const constructor=gateDeployment.data?.calldata?.readable;
+assert.ok(typeof constructor==='string' && constructor.toLowerCase().includes(`addr#${seal.slice(2).toLowerCase()}`));
+journal.gate_constructor={coverage_seal:seal,decoded_calldata:constructor}; persist();
 const manifest=JSON.parse(fs.readFileSync('fixtures/demo_manifest.json','utf8'));
 async function add(label,pid,name) { const a=manifest.artifacts[name]; await write(label,seal,'add_artifact',[pid,name,a.url,a.keccak256]); }
 await write('create_schema',seal,'create_schema',['Atlas diligence closeout',manifest.source_prefix]);
@@ -163,5 +191,16 @@ assert.equal(await read('conflict_exact',seal,'is_complete',[3,...pins(conflict)
 for(const [label,pid,rid] of [['owners',1,1],['finances',1,2],['missing_owners',2,1],['missing_finances',2,2],['conflicted',3,3]]) {
   const summary=await read(label,seal,'get_requirement_status',[pid,rid]); assert.equal(summary.unresolved,false);
 }
+// Accepted execution permits dependent writes; only finalized receipts count as
+// final proof. Re-read every certificate after all transactions reach finality.
+for (const [label,entry] of Object.entries(journal.transactions)) {
+  entry.receipt = await receipt(entry.hash,entry.expected); persist();
+  console.log('Finalized',label);
+}
+for (const [label,pid] of [['complete',1],['missing',2],['conflict',3]]) {
+  const result=await retryRead(()=>client.readContract({address:seal,functionName:'get_package',args:[pid],jsonSafeReturn:true,transactionHashVariant:'latest-final'}));
+  assert.deepEqual(result,journal.reads[label]);
+}
+assert.equal(await retryRead(()=>client.readContract({address:gate,functionName:'was_executed',args:[action],transactionHashVariant:'latest-final'})),true);
 journal.completed_at_utc=new Date().toISOString(); persist();
 console.log('SUCCESS: source-matched StudioNet deployments, complete/missing/conflict lifecycles and consumer checks');

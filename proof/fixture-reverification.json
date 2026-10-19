@@ -1,0 +1,35 @@
+{
+  "verified_at_utc": "2026-10-19T07:53:17.193909+00:00",
+  "fixtures": {
+    "finances.txt": {
+      "url": "https://raw.githubusercontent.com/BeatyXO/CoverageSeal/1ddcce53a43099fa25ec651a1bc06646f4a4771d/fixtures/finances.txt",
+      "keccak256": "8a62a4141409f212da530f43fa00df69b59a45cae25c3150b57cc364f320e918",
+      "matches": true,
+      "bytes": 198
+    },
+    "incidents_clear.txt": {
+      "url": "https://raw.githubusercontent.com/BeatyXO/CoverageSeal/1ddcce53a43099fa25ec651a1bc06646f4a4771d/fixtures/incidents_clear.txt",
+      "keccak256": "892757bcba9d8d99e19c63b90a1c0d1b49fd22388df30e472e5efd221b696d8e",
+      "matches": true,
+      "bytes": 124
+    },
+    "incidents_conflicting.txt": {
+      "url": "https://raw.githubusercontent.com/BeatyXO/CoverageSeal/1ddcce53a43099fa25ec651a1bc06646f4a4771d/fixtures/incidents_conflicting.txt",
+      "keccak256": "fe5a3231e59d9920530f517bb92b367f5e10fd98f22a70eec326ffee3dffd1a2",
+      "matches": true,
+      "bytes": 158
+    },
+    "ownership.txt": {
+      "url": "https://raw.githubusercontent.com/BeatyXO/CoverageSeal/1ddcce53a43099fa25ec651a1bc06646f4a4771d/fixtures/ownership.txt",
+      "keccak256": "f0c8fb1af94ea7d73f1d8dd719e18b01b5734a40cfdcba54d65780b99860cf41",
+      "matches": true,
+      "bytes": 261
+    },
+    "ownership_only.txt": {
+      "url": "https://raw.githubusercontent.com/BeatyXO/CoverageSeal/1ddcce53a43099fa25ec651a1bc06646f4a4771d/fixtures/ownership_only.txt",
+      "keccak256": "ea57ae2f789f9f7aaabd7b91f9ed1e153dbf9247d31d397a5f905fc2990e2740",
+      "matches": true,
+      "bytes": 182
+    }
+  }
+}

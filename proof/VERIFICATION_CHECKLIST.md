@@ -1,26 +1,23 @@
 # Verification checklist
 
-## Local verification completed
+- [x] StudioNet chain ID checked as 61999 before other RPC operations.
+- [x] Python 3.12 compilation and final structural preflight.
+- [x] 4 unit tests and 20 Direct Mode tests (19 original plus 1 regression).
+- [x] Both contracts: GenVM Linter 0.11.0 check, validate, strict typecheck and ABI generation.
+- [x] Official v0.3.0-rc7 runner SHA-256 verified; unchanged bytes copied into the legacy Direct Mode cache.
+- [x] Corrected deployments finalized; retrieved sources exactly match under documented LF normalization.
+- [x] Consumer constructor pins the corrected CoverageSeal address.
+- [x] Complete two-requirement lifecycle, missing-evidence lifecycle and contradictory-evidence lifecycle.
+- [x] All 38 closeout transaction receipts FINALIZED; consensus and leader execution checked separately.
+- [x] Exact complete pins accepted; wrong pins, missing-evidence certificate and conflicting certificate return false.
+- [x] Consumer success persisted; wrong-pin, replay and incomplete-certificate rollbacks decoded and checked.
+- [x] Finalized-state package and consumer read-backs verified.
+- [x] Both independent validators reject forged quotes, wrong digests and classification disagreement.
+- [x] Conflict cannot hide an unresolved assessment; regression passes.
+- [x] Five immutable fixture URLs fetched again and matched manifest digests.
+- [x] Historical 38 transaction references independently reverified and archived as superseded.
+- [x] Clean Ubuntu engineering CI: [SUCCESS](https://github.com/BeatyXO/CoverageSeal/actions/runs/39218358805) on source revision `447464f6b52d4942bd78e6c1a15a7b742617dcb2`.
 
-- [x] Python 3.12 compileall over contracts, scripts and tests
-- [x] `python scripts/preflight.py`
-- [x] `pytest tests/unit -q`: 4 passed
-- [x] `pytest tests/direct -q`: 19 passed, including validator re-fetch/quote-grounding and disagreement cases
-- [x] `genvm-lint check` passes for both contracts with `GENVM_VERSION=v0.3.0-rc7`
-- [x] CLI target confirmed as stable `studionet`, chain ID 61999, RPC `https://studio.genlayer.com/api`
-- [x] All five fixture URLs are pinned to commit `1ddcce53a43099fa25ec651a1bc06646f4a4771d` and fetched bytes match their Keccak-256 digests
+The final submission SHA and corresponding Actions run are reported after the evidence commit is pushed. The workflow repeats every required check. Repository-local preflight checks recorded source hashes and finalized receipt structure; it does not replace independent live receipt verification.
 
-## Stable StudioNet verification completed
-
-- [x] Corrected CoverageSeal and CoverageGate deployed; both deployment receipts are finalized
-- [x] Two required dimensions and two pinned documents assessed across all four edges
-- [x] Both positive-positive pairs assessed as `NO_CONFLICT`; package finalized `COMPLETE`
-- [x] Exact certificate pins return true; substituted package hash, incomplete certificate and unknown package return false
-- [x] CoverageGate recorded a valid action with persisted execution receipt
-- [x] Wrong-pin, replay and incomplete-package actions finalized with expected rollback reasons
-- [x] Required-missing finance package finalized `INCOMPLETE`
-- [x] Two positively covering incident reports returned `CONTRADICTS`; requirement finalized `CONFLICTED` and package `INCOMPLETE`
-- [x] Transaction IDs, receipt finality, consensus and execution outcomes recorded in `verified-studionet.json`
-- [x] `python scripts/preflight.py --final` passes against the proof record
-
-Receipt finality was checked with GenLayerJS `2.0.0-rc.1`; the StudioNet endpoint does not expose `gen_getTransactionLifecycle`. The linter reports a newer runner is available, while the contracts remain pinned to the v0.3.0-rc7 runner validated by Direct Mode and the explicit semantic checks.
+See [deployment evidence](../DEPLOYMENT.md), [canonical proof](verified-studionet.json), and [receipt journal](closeout-journal.json). Semantic coverage does not establish document truth, authority or source independence.
